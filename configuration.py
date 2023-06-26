@@ -14,5 +14,6 @@ methods = {
     'getGasPrice': config.get('RpcGethEndpoint', 'getGasPrice'),
     'getBalance': config.get('RpcGethEndpoint', 'getBalance'),
     'getWalletTransactionsCount': config.get("RpcGethEndpoint", 'getWalletTransactionsCount'),
-    'sendTransaction': config.get("RpcGethEndpoint", 'sendTransaction')
+    'sendTransaction': config.get("RpcGethEndpoint", 'sendTransaction'),
+    'wallets': config.get("RpcClefEndpoint", 'getWallets'),
 }
