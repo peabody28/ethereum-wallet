@@ -10,9 +10,8 @@ clefRpcApi = config.get('RpcApiUrl', 'clef')
 # endpoints
 # geth
 methods = {
-    'getBalanceMethod': config.get('RpcGethEndpoint', 'getBalance'),
-    'getGasPrice': config.get('RpcGethEndpoint', 'getGasPrice'),
     'getBalance': config.get('RpcGethEndpoint', 'getBalance'),
+    'getGasPrice': config.get('RpcGethEndpoint', 'getGasPrice'),
     'getWalletTransactionsCount': config.get("RpcGethEndpoint", 'getWalletTransactionsCount'),
     'sendTransaction': config.get("RpcGethEndpoint", 'sendTransaction'),
     'wallets': config.get("RpcClefEndpoint", 'getWallets'),

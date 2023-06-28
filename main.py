@@ -1,65 +1,9 @@
-from jsonrpcclient import request as rpc_req
-from jsonrpcclient import parse_json as rpc_parse
 from tkinter import *
 from tkinter import ttk
 
-import currencyHelper
-import httpHelper
-import configuration
+import core
 
 approvingRequiredMessage = "For this action required manual approving in Clef console!"
-
-def getBalance(wallet):
-    req = rpc_req(configuration.methods["getBalanceMethod"], [wallet, "latest"])
-    response = httpHelper.sendRequest(configuration.gethRpcApi, req)
-
-    data = rpc_parse(response.content)
-    amount = int(data.result, 16)
-
-    return currencyHelper.toEther(amount)
-
-
-def getGasPrice():
-    req = rpc_req(configuration.methods["getGasPrice"])
-    response = httpHelper.sendRequest(configuration.gethRpcApi, req)
-
-    data = rpc_parse(response.content)
-    amount = int(data.result, 16)
-
-    return currencyHelper.toEther(amount)
-
-
-# integer of the number of transactions send from this address.
-def getTransactionsCount(wallet):
-    req = rpc_req(configuration.methods["getWalletTransactionsCount"], [wallet, "latest"])
-    response = httpHelper.sendRequest(configuration.gethRpcApi, req)
-
-    data = rpc_parse(response.content)
-    count = int(data.result, 16)
-
-    return count
-
-
-def sendTransaction(walletFrom, walletTo, ethAmount):
-    weiAmount = currencyHelper.toWei(ethAmount)
-
-    req_obj = {'from': walletFrom, 'to': walletTo, 'value': hex(weiAmount)}
-    req = rpc_req(configuration.methods["sendTransaction"], [req_obj])
-
-    response = httpHelper.sendRequest(configuration.gethRpcApi, req)
-
-    data = rpc_parse(response.content)
-    return data.result if response.status_code == 200 else data.message
-
-
-def getWallets():
-    req = rpc_req(configuration.methods["wallets"])
-    response = httpHelper.sendRequest(configuration.clefRpcApi, req)
-
-    data = rpc_parse(response.content)
-
-    return data.result
-
 
 def printApprovingRequiredMessage():
     print(approvingRequiredMessage)
@@ -73,14 +17,13 @@ def printMenu():
           "- wallet_transaction_count\n"
           "- send_transaction")
 
-
 walletsList = []
 
 def configureWalletsWindow(frame):
     global walletsList
     if len(walletsList) == 0:
         printApprovingRequiredMessage()
-        walletsList = getWallets()
+        walletsList = core.getWallets()
 
     for walletNumber in walletsList:
         block = Frame(master=frame)
@@ -91,7 +34,7 @@ def configureWalletsWindow(frame):
         label.config(state="readonly")
 
         balance = Entry(master=block, font=("Arial", 12))
-        balance.insert(END, getBalance(walletNumber))
+        balance.insert(END, core.getBalance(walletNumber))
         balance.pack(side=RIGHT)
         balance.config(state="readonly")
 
@@ -99,7 +42,7 @@ def configureWalletsWindow(frame):
 
 
 def configureBlockchainInfoWindow(frame):
-    gasPrice = getGasPrice()
+    gasPrice = core.getGasPrice()
     gasPriceLabel = ttk.Label(master=frame, text="Gas price")
     gasPriceLabel.pack(side=TOP)
 
@@ -118,7 +61,7 @@ def configureBlockchainInfoWindow(frame):
 
 
 def sendTransacionButtonHandler(walletFromEntry, walletToEnty, amountEntry, message):
-    response = sendTransaction(walletFromEntry.get(), walletToEnty.get(), float(amountEntry.get()))
+    response = core.sendTransaction(walletFromEntry.get(), walletToEnty.get(), float(amountEntry.get()))
 
     message.config(state="normal")
     message.delete(0, END)
@@ -142,12 +85,11 @@ def configureTransactionsTab(frame):
     amount = Entry(master=frame, font=("Arial", 12), width=20)
     amount.pack(side=TOP, pady=(0, 5))
 
-    message = ttk.Entry(master=frame)
-    message.insert(END, approvingRequiredMessage)
-
     button = ttk.Button(master=frame, text="Send", command=lambda: sendTransacionButtonHandler(walletFrom, walletTo, amount, message))
     button.pack(side=TOP)
 
+    message = ttk.Entry(master=frame)
+    message.insert(END, approvingRequiredMessage)
     message.pack(side=TOP, fill=X, pady=(5, 0))
     message.config(state="readonly")
 
@@ -175,6 +117,3 @@ configureBlockchainInfoWindow(blockChainInfo)
 configureTransactionsTab(sendTransactionTab)
 
 root.mainloop()
-
-# 0xEd44F8f248D1aA634bCCfEF02AC6c13e673d68e1
-# 0x79d00246f60d58e955754b8e0cd8b584d6e7e875
